@@ -1,0 +1,29 @@
+.control-group
+  label.control-label for="card-number" カード番号
+  .controls
+    input#card-number.input-large(placeholder="1234567812345678" type="text" title="カード番号を入力してください" required)
+    span.help-inline
+      span.credit-cards VISA / MasterCard / JCB / AMEX / Diners
+.control-group
+  label.control-label for="card-name" カード名義
+  .controls
+    input#card-name.input-xlarge(placeholder="TARO YAMADA" type="text" required)
+.control-group
+  label.control-label for="card-exp-month" 有効期限
+  .controls
+    input#card-exp-month.input-xmini.text-right(type="text" required)
+    '
+    ' /
+    input#card-exp-year.input-xmini.text-right(type="text" required)
+    span.help-inline 月 / 年
+.control-group
+  .control-group
+    label.control-label for="card-cvc" セキュリティコード
+    .controls
+      input#card-cvc.input-mini.text-right(type="text" placeholder="000" required)
+        span.help-inline ※ カード裏面サイン欄の右上にある3桁の数字 / AMEXのみ表面中央にある4桁
+.hidden
+  = f.hidden_field :card_token, id: 'card-token', value: ''
+
+// for application.html.slim
+// = javascript_include_tag 'https://js.webpay.jp/v1/'

@@ -1,0 +1,80 @@
+$ = jQuery
+
+$.fn.extend
+  webpay: (options) ->
+    # Default settings
+    settings =
+      card_ids:
+        number: '#card-number'
+        name: '#card-name'
+        exp_month: '#card-exp-month'
+        exp_year: '#card-exp-year'
+        cvc: '#card-cvc'
+      token_id: '#card-token'
+      prepare_required: true
+      debug: false
+
+    settings = $.extend settings, options
+
+    me = $(this)
+
+    log = (msg) ->
+      console?.log msg if settings.debug
+
+    number = -> $(settings.card_ids.number, me)
+    name = -> $(settings.card_ids.name, me)
+    exp_month = -> $(settings.card_ids.exp_month, me)
+    exp_year = -> $(settings.card_ids.exp_year, me)
+    cvc = -> $(settings.card_ids.cvc, me)
+
+
+    set_required = ->
+      number().attr pattern: "[0-9]{15,16}", required: "required"
+      name().attr pattern: "[A-Z]+( [A-Z]+)+", required: "required"
+      exp_month().attr pattern: "0?[1-9]|10|11|12", required: "required"
+      exp_year().attr pattern: "1[4-9]|[2-4][0-9]", required: "required"
+      cvc().attr pattern: "[0-9]{3,4}", required: "required"
+
+    remove_required = ->
+      number().removeAttr "pattern required"
+      name().removeAttr "pattern required"
+      exp_month().removeAttr "pattern required"
+      exp_year().removeAttr "pattern required"
+      cvc().removeAttr "pattern required"
+
+    clear_inputs = ->
+      number().val('')
+      name().val('')
+      exp_month().val('')
+      exp_year().val('')
+      cvc().val('')
+
+    get_inputs = ->
+      number: number().val()
+      name: name().val()
+      exp_month: exp_month().val()
+      exp_year: exp_year().val()
+      cvc: cvc().val()
+
+    response_handler = (status, response) ->
+      if response.error
+        $('button', me).prop "disabled", false
+        log response.error
+        alert response.error
+      else
+        $(settings.token_id, me).val response.id
+        clear_inputs()
+        log response.id
+        me.submit()
+
+    setup_form = ->
+      if $(settings.token_id, me).val() is ""
+        $('button', me).prop "disabled", true
+        card = get_inputs()
+        WebPay.createToken card, response_handler
+        return false
+      true
+
+    WebPay.setPublishableKey "<%= ENV['WEBPAY_PUBLIC_KEY'] %>"
+    set_required() if settings.prepare_required
+    me.submit setup_form
